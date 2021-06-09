@@ -21,11 +21,11 @@ function ppid() {
 
 DOCKER_WSL="/mnt/c/Program Files/Docker/Docker/resources"
 
-for cmd in socat unzip isoinfo wget p7zip; do
+for cmd in socat unzip isoinfo p7zip; do
     if ! command -v "${cmd}" &> /dev/null; then
         # Warning: Specific to debian/ubuntu
         apt update
-        apt install -y socat unzip p7zip genisoimage wget
+        apt install -y socat unzip p7zip genisoimage
         break
     fi
 done
@@ -46,7 +46,6 @@ touch /etc/sudoers.d/wsl-vpnkit
 write_to_file "${SUDO_USER} ALL=(ALL) NOPASSWD: /usr/sbin/service wsl-vpnkit *" /etc/sudoers.d/wsl-vpnkit
 chown root:root /etc/sudoers.d/wsl-vpnkit
 
-cd ~
 mkdir -p /mnt/c/bin
 cp "${DOCKER_WSL}/vpnkit.exe" /mnt/c/bin/wsl-vpnkit.exe
 
@@ -55,7 +54,9 @@ mv vpnkit-tap-vsockd /sbin/vpnkit-tap-vsockd
 chmod +x /sbin/vpnkit-tap-vsockd
 chown root:root /sbin/vpnkit-tap-vsockd
 
-wget https://github.com/jstarks/npiperelay/releases/download/v0.1.0/npiperelay_windows_amd64.zip
+# This doesn't require WSL internet to be working. Apparently calling powershell
+# this way writes directly to this same directory
+/mnt/c/WINDOWS/system32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -Command "Invoke-WebRequest -Uri https://github.com/jstarks/npiperelay/releases/download/v0.1.0/npiperelay_windows_amd64.zip -OutFile npiperelay_windows_amd64.zip"
 unzip npiperelay_windows_amd64.zip npiperelay.exe
 rm npiperelay_windows_amd64.zip
 mv npiperelay.exe /mnt/c/bin/
