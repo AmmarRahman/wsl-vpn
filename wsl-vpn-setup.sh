@@ -18,7 +18,7 @@ function write_to_file() {
 DOCKER_WSL="/mnt/c/Program Files/Docker/Docker/resources"
 
 for cmd in socat unzip isoinfo wget p7zip; do
-    if ! command -v "${cmd}" &> /dev/nul; then
+    if ! command -v "${cmd}" &> /dev/null; then
         # Warning: Specific to debian/ubuntu
         apt update
         apt install -y socat unzip p7zip genisoimage wget
