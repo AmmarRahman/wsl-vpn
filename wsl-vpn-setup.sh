@@ -61,10 +61,10 @@ unzip npiperelay_windows_amd64.zip npiperelay.exe
 rm npiperelay_windows_amd64.zip
 mv npiperelay.exe /mnt/c/bin/
 
-echo "service wsl-vpnkit status > /dev/null || sudo service wsl-vpnkit start" > /etc/profile.d/wsl-vpnkit.sh
+echo "service wsl-vpnkit status > /dev/null || service wsl-vpnkit start" > /etc/profile.d/wsl-vpnkit.sh
 chmod 644 /etc/profile.d/wsl-vpnkit.sh
 chown root:root /etc/profile.d/wsl-vpnkit.sh
-write_to_file "service wsl-vpnkit status > /dev/null || sudo service wsl-vpnkit start"  /etc/zsh/zprofile
+write_to_file "service wsl-vpnkit status > /dev/null || service wsl-vpnkit start"  /etc/zsh/zprofile
 
 if [ -e "/etc/wsl.conf" ]; then
     cp /etc/wsl.conf /etc/.wsl.conf.orig
