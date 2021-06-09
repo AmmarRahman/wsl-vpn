@@ -60,8 +60,10 @@ unzip npiperelay_windows_amd64.zip npiperelay.exe
 rm npiperelay_windows_amd64.zip
 mv npiperelay.exe /mnt/c/bin/
 
-write_to_file "sudo service wsl-vpnkit start"  /etc/profile
-write_to_file "sudo service wsl-vpnkit start"  /etc/zsh/zprofile
+echo "service wsl-vpnkit status > /dev/null || sudo service wsl-vpnkit start" > /etc/profile.d/wsl-vpnkit.sh
+chmod 644 /etc/profile.d/wsl-vpnkit.sh
+chown root:root /etc/profile.d/wsl-vpnkit.sh
+write_to_file "service wsl-vpnkit status > /dev/null || sudo service wsl-vpnkit start"  /etc/zsh/zprofile
 
 if [ -e "/etc/wsl.conf" ]; then
     cp /etc/wsl.conf /etc/.wsl.conf.orig
@@ -69,12 +71,16 @@ else
     touch /etc/.wsl.conf.orig
 fi
 
+if [ -L /etc/resolv.conf ]; then
+  unlink /etc/resolv.conf
+fi
+
 if ! grep "^generateResolvConf = false" /etc/wsl.conf &> /dev/null; then
     if ! grep "^\[network\]" /etc/wsl.conf &> /dev/null; then
-      # append to end of the file, always makes it its own line
-      sed -i '$a[network]' /etc/wsl.conf
+        # append to end of the file, always makes it its own line
+        sed -i '$a[network]' /etc/wsl.conf
     fi
     sed -i 's|^\[network\].*|&\ngenerateResolvConf = false|' /etc/wsl.conf
 fi
 
-echo "Setup"
+echo "Setup complete"
