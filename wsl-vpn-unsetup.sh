@@ -10,7 +10,7 @@ fi
 function sed_file() {
     if [ -e "${2}" ]; then
         sed -i "${1}" "${2}"
-    fi 
+    fi
 }
 
 function rm_if() {
@@ -32,5 +32,13 @@ rmdir /mnt/c/bin || :
 
 sed_file '/^sudo service wsl-vpnkit start$/d' /etc/profile
 sed_file '/^sudo service wsl-vpnkit start$/d' /etc/zsh/zprofile
+
+if [ -e /etc/.wsl.conf.orig ]; then
+    if ! grep -q '^generateResolvConf = false' /etc/.wsl.conf.orig; then
+       sed -i '/^generateResolvConf = false.*/d' /etc/wsl.conf
+    fi
+    rm /etc/.wsl.conf.orig
+fi
+
 
 echo "Removed!"

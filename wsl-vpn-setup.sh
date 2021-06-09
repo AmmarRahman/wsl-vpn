@@ -63,4 +63,18 @@ mv npiperelay.exe /mnt/c/bin/
 write_to_file "sudo service wsl-vpnkit start"  /etc/profile
 write_to_file "sudo service wsl-vpnkit start"  /etc/zsh/zprofile
 
+if [ -e "/etc/wsl.conf" ]; then
+    cp /etc/wsl.conf /etc/.wsl.conf.orig
+else
+    touch /etc/.wsl.conf.orig
+fi
+
+if ! grep "^generateResolvConf = false" /etc/wsl.conf &> /dev/null; then
+    if ! grep "^\[network\]" /etc/wsl.conf &> /dev/null; then
+      # append to end of the file, always makes it its own line
+      sed -i '$a[network]' /etc/wsl.conf
+    fi
+    sed -i 's|^\[network\].*|&\ngenerateResolvConf = false|' /etc/wsl.conf
+fi
+
 echo "Setup"
