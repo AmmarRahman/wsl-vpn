@@ -30,7 +30,7 @@ rm_if /mnt/c/bin/npiperelay.exe
 rm_if /mnt/c/bin/wsl-vpnkit.exe
 rmdir /mnt/c/bin || :
 
-sed_file '/^service wsl-vpnkit start$/d' /etc/profile 
-sed_file '/^service wsl-vpnkit start$/d' /etc/zsh/zprofile
+sed_file '/^sudo service wsl-vpnkit start$/d' /etc/profile
+sed_file '/^sudo service wsl-vpnkit start$/d' /etc/zsh/zprofile
 
 echo "Removed!"

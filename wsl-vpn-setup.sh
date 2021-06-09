@@ -14,6 +14,10 @@ function write_to_file() {
     fi
 }
 
+# Get the parent pid, in a way that should work on any WSL distro
+function ppid() {
+    sed -n "s|PPid:\s*||p" /proc/$1/status
+}
 
 DOCKER_WSL="/mnt/c/Program Files/Docker/Docker/resources"
 
@@ -28,7 +32,12 @@ done
 
 cp ./wsl_vpn_start.sh /usr/bin/
 chmod +x /usr/bin/wsl_vpn_start.sh
-cp ./wsl-vpnkit.service /etc/init.d/wsl-vpnkit
+chown root:root /usr/bin/wsl_vpn_start.sh
+
+# Need WSL_DISTRO_NAME, because _this_ wsl might not be the default
+eval "$(cat /proc/$(ppid $(ppid $$))/environ | tr "\0" "\n" | grep ^WSL_DISTRO_NAME=)"
+# WSL_DISTRO_NAME is not set when "service wsl-vpnkit start" is run, so put the value in the script
+sed 's|%%WSL_DISTRO_NAME%%|'"${WSL_DISTRO_NAME}"'|' ./wsl-vpnkit.service > /etc/init.d/wsl-vpnkit
 chmod +x /etc/init.d/wsl-vpnkit
 chown root:root /etc/init.d/wsl-vpnkit
 
@@ -51,9 +60,7 @@ unzip npiperelay_windows_amd64.zip npiperelay.exe
 rm npiperelay_windows_amd64.zip
 mv npiperelay.exe /mnt/c/bin/
 
+write_to_file "sudo service wsl-vpnkit start"  /etc/profile
+write_to_file "sudo service wsl-vpnkit start"  /etc/zsh/zprofile
 
-
-write_to_file "service wsl-vpnkit start"  /etc/profile
-write_to_file "service wsl-vpnkit start"  /etc/zsh/zprofile
-
-
+echo "Setup"
