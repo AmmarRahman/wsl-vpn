@@ -6,7 +6,7 @@ The solution utilises [Docker's VPNKit](https://github.com/moby/vpnkit) and [Jef
 
 ## Getting started
 
-Once you have pulled the repoistory into your WSL2 environment you have two options
+Once you have pulled the repoistory into your WSL2 environment (while not on VPN yet) you have two options
 
 ### *Option 1:*
 
