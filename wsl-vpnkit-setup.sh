@@ -109,7 +109,7 @@ write_to_file "service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
 if [ -e "/etc/wsl.conf" ]; then
   cp /etc/wsl.conf /etc/.wsl.conf.orig
 else
-  touch /etc/.wsl.conf.orig
+  touch /etc/.wsl.conf.orig /etc/wsl.conf
 fi
 
 if ! grep "^generateResolvConf = false" /etc/wsl.conf &> /dev/null; then
@@ -125,7 +125,11 @@ if [ -L /etc/resolv.conf ]; then
   unlink /etc/resolv.conf
 fi
 
-echo "Starting service..."
-service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
-
+# echo "Starting service..."
+# service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
 echo "Setup complete!"
+
+echo "WSL ${WSL_DISTRO_NAME} must be restarted inorder for some of the changes to take affect"
+read -sn1 -p "Press any key to terminal ${WSL_DISTRO_NAME}"
+
+"${SYSTEM_ROOT}/system32/wsl.exe" -t "${WSL_DISTRO_NAME}"
