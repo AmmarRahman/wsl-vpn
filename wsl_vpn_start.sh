@@ -17,47 +17,50 @@ TAP_NAME=eth1
 IP_ROUTE=
 RESOLV_CONF=
 
-relay () {
-    socat UNIX-LISTEN:$SOCKET_PATH,fork,umask=007 EXEC:"$VPNKIT_NPIPERELAY_PATH -ep -s $PIPE_PATH",nofork
+relay()
+{
+  socat UNIX-LISTEN:$SOCKET_PATH,fork,umask=007 EXEC:"$VPNKIT_NPIPERELAY_PATH -ep -s $PIPE_PATH",nofork
 }
 
-vpnkit () {
-    WIN_PIPE_PATH=$(echo $PIPE_PATH | sed -e "s:/:\\\:g")
-    "${WIN_BIN}/wsl-vpnkit.exe" \
-        --ethernet $WIN_PIPE_PATH \
-        --listen-backlog $VPNKIT_BACKLOG \
-        --gateway-ip $VPNKIT_GATEWAY_IP \
-        --host-ip $VPNKIT_HOST_IP \
-        --lowest-ip $VPNKIT_LOWEST_IP \
-        --highest-ip $VPNKIT_HIGHEST_IP 
-  
-  
+vpnkit()
+{
+  WIN_PIPE_PATH=$(echo $PIPE_PATH | sed -e "s:/:\\\:g")
+  "${WIN_BIN}/wsl-vpnkit.exe" \
+      --ethernet $WIN_PIPE_PATH \
+      --listen-backlog $VPNKIT_BACKLOG \
+      --gateway-ip $VPNKIT_GATEWAY_IP \
+      --host-ip $VPNKIT_HOST_IP \
+      --lowest-ip $VPNKIT_LOWEST_IP \
+      --highest-ip $VPNKIT_HIGHEST_IP
 }
 
-tap () {
-    vpnkit-tap-vsockd --tap $TAP_NAME --path $SOCKET_PATH
+tap()
+{
+  vpnkit-tap-vsockd --tap $TAP_NAME --path $SOCKET_PATH
 }
 
-ipconfig () {
-    ip a add $VPNKIT_LOWEST_IP/255.255.255.0 dev $TAP_NAME
-    ip link set dev $TAP_NAME up
-    IP_ROUTE=$(ip route | grep default)
-    ip route del $IP_ROUTE
-    ip route add default via $VPNKIT_GATEWAY_IP dev $TAP_NAME
-    RESOLV_CONF=$(cat /etc/resolv.conf)
-    echo "nameserver $VPNKIT_GATEWAY_IP" > /etc/resolv.conf
+ipconfig()
+{
+  ip a add $VPNKIT_LOWEST_IP/255.255.255.0 dev $TAP_NAME
+  ip link set dev $TAP_NAME up
+  IP_ROUTE=$(ip route | grep default)
+  ip route del $IP_ROUTE
+  ip route add default via $VPNKIT_GATEWAY_IP dev $TAP_NAME
+  RESOLV_CONF=$(cat /etc/resolv.conf)
+  echo "nameserver $VPNKIT_GATEWAY_IP" > /etc/resolv.conf
 }
 
-close () {
-    ip link set dev $TAP_NAME down
-    ip route add $IP_ROUTE
-    echo "$RESOLV_CONF" > /etc/resolv.conf
-    kill 0
+close()
+{
+  ip link set dev $TAP_NAME down
+  ip route add $IP_ROUTE
+  echo "$RESOLV_CONF" > /etc/resolv.conf
+  kill 0
 }
 
 if [ ${EUID:-$(id -u)} -ne 0 ]; then
-    echo "Please run this script as root"
-    exit 1
+  echo "Please run this script as root"
+  exit 1
 fi
 
 relay &

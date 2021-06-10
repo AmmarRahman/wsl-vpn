@@ -3,31 +3,33 @@
 set -eu
 
 if [ ${EUID:-$(id -u)} -ne 0 ] || [ -z "${SUDO_USER-}" ]; then
-    echo "You need to run this as sudo"
-    exit 1
+  echo "You need to run this as sudo"
+  exit 1
 fi
 
 # This function check if the file exist then only append the line once
-function write_to_file() {
-    if [ -e "$2" ]; then
-        grep -qFs "$1" "$2" || echo "$1" | tee -a "$2"
-    fi
+function write_to_file()
+{
+  if [ -e "$2" ]; then
+      grep -qFs "$1" "$2" || echo "$1" | tee -a "$2"
+  fi
 }
 
 # Get the parent pid, in a way that should work on any WSL distro
-function ppid() {
-    sed -n "s|PPid:\s*||p" /proc/$1/status
+function ppid()
+{
+  sed -n "s|PPid:\s*||p" /proc/$1/status
 }
 
 DOCKER_WSL="/mnt/c/Program Files/Docker/Docker/resources"
 
 for cmd in socat unzip isoinfo p7zip; do
-    if ! command -v "${cmd}" &> /dev/null; then
-        # Warning: Specific to debian/ubuntu
-        apt update
-        apt install -y socat unzip p7zip genisoimage
-        break
-    fi
+  if ! command -v "${cmd}" &> /dev/null; then
+    # Warning: Specific to debian/ubuntu
+    apt update
+    apt install -y socat unzip p7zip genisoimage
+    break
+  fi
 done
 
 cp ./wsl_vpn_start.sh /usr/bin/
@@ -67,9 +69,9 @@ chown root:root /etc/profile.d/wsl-vpnkit.sh
 write_to_file "service wsl-vpnkit status > /dev/null || service wsl-vpnkit start"  /etc/zsh/zprofile
 
 if [ -e "/etc/wsl.conf" ]; then
-    cp /etc/wsl.conf /etc/.wsl.conf.orig
+  cp /etc/wsl.conf /etc/.wsl.conf.orig
 else
-    touch /etc/.wsl.conf.orig
+  touch /etc/.wsl.conf.orig
 fi
 
 if [ -L /etc/resolv.conf ]; then
@@ -77,11 +79,11 @@ if [ -L /etc/resolv.conf ]; then
 fi
 
 if ! grep "^generateResolvConf = false" /etc/wsl.conf &> /dev/null; then
-    if ! grep "^\[network\]" /etc/wsl.conf &> /dev/null; then
-        # append to end of the file, always makes it its own line
-        sed -i '$a[network]' /etc/wsl.conf
-    fi
-    sed -i 's|^\[network\].*|&\ngenerateResolvConf = false|' /etc/wsl.conf
+  if ! grep "^\[network\]" /etc/wsl.conf &> /dev/null; then
+    # append to end of the file, always makes it its own line
+    sed -i '$a[network]' /etc/wsl.conf
+  fi
+  sed -i 's|^\[network\].*|&\ngenerateResolvConf = false|' /etc/wsl.conf
 fi
 
 echo "Setup complete"
