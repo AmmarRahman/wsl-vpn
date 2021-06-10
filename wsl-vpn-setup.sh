@@ -85,3 +85,7 @@ if ! grep "^generateResolvConf = false" /etc/wsl.conf &> /dev/null; then
 fi
 
 echo "Setup complete"
+
+echo "Starting service..."
+service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
+echo "Service started!"
