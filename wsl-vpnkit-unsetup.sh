@@ -2,31 +2,19 @@
 
 set -eu
 
+source common.env
+
 if [ ${EUID:-$(id -u)} -ne 0 ]; then
   echo "You need to run this as sudo"
   exit 1
 fi
 
-function sed_file()
-{
-  if [ -e "${2}" ]; then
-    sed -i "${1}" "${2}"
-  fi
-}
-
-function rm_if()
-{
-  if [ -e "${1}" ]; then
-    rm "${1}"
-  fi
-}
-
 service wsl-vpnkit stop || :
 
-rm_if /usr/bin/wsl_vpn_start.sh
+rm_if /usr/local/bin/wsl-vpnkit-start.sh
 rm_if /etc/init.d/wsl-vpnkit
 rm_if /etc/sudoers.d/wsl-vpnkit
-rm_if /sbin/vpnkit-tap-vsockd
+rm_if /usr/local/sbin/vpnkit-tap-vsockd
 
 rm_if /mnt/c/bin/npiperelay.exe
 rm_if /mnt/c/bin/wsl-vpnkit.exe
@@ -44,6 +32,5 @@ if [ -e /etc/.wsl.conf.orig ]; then
   fi
   rm /etc/.wsl.conf.orig
 fi
-
 
 echo "Removed!"

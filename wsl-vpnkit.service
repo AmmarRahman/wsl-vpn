@@ -1,16 +1,16 @@
 #!/usr/bin/env sh
 
-WSLVPNKIT_PATH="/usr/bin/wsl_vpn_start.sh"
+WSLVPNKIT_PATH="/usr/local/bin/wsl-vpnkit-start.sh"
 PID_PATH="/var/run/wsl-vpnkit.pid"
 LOG_PATH="/var/log/wsl-vpnkit.log"
 
-cmd="/sbin/start-stop-daemon --startas /bin/sh --make-pidfile --remove-pidfile --pidfile $PID_PATH"
+cmd="/sbin/start-stop-daemon --startas /bin/sh --make-pidfile --remove-pidfile --pidfile ${PID_PATH}"
 ret=0
 
 start()
 {
   # using `wsl.exe` allows the daemon to keep running in the background even when you close your terminal
-  /mnt/c/WINDOWS/system32/wsl.exe -d "%%WSL_DISTRO_NAME%%" --user root -- $cmd --oknodo --background --start -- -c "exec $WSLVPNKIT_PATH >> $LOG_PATH 2>&1"
+  "%%SYSTEM_ROOT%%/system32/wsl.exe" -d "%%WSL_DISTRO_NAME%%" --user root -- $cmd --oknodo --background --start -- -c "exec ${WSLVPNKIT_PATH} >> ${LOG_PATH} 2>&1"
   ret=$?
 }
 
