@@ -46,7 +46,7 @@ ipconfig()
   ip a add "${VPNKIT_LOWEST_IP}/255.255.255.0" dev "${TAP_NAME}"
   ip link set dev "${TAP_NAME}" up
   IP_ROUTE=$(ip route | grep default)
-  ip route del "${IP_ROUTE}"
+  ip route del ${IP_ROUTE}
   ip route add default via "${VPNKIT_GATEWAY_IP}" dev "${TAP_NAME}"
   RESOLV_CONF=$(cat /etc/resolv.conf)
   echo "nameserver ${VPNKIT_GATEWAY_IP}" > /etc/resolv.conf
