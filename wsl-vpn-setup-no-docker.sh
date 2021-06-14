@@ -1,6 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if [ ${EUID:-$(id -u)} -ne 0 ]; then
+set -eu
+
+if [ ${EUID:-$(id -u)} -ne 0 ] || [ -z "${SUDO_USER-}" ]; then
     echo "You need to run this as sudo"
     exit 1
 fi
@@ -17,13 +19,14 @@ function write_to_file() {
 WSL_BIN=https://github.com/AmmarRahman/wsl-vpn/releases/latest/download/wslbin.tar.gz
 WIN_BIN=/mnt/c/bin
 
+apt update
 apt install -y socat
 
-wget $WSL_BIN -t -O wslbin.tar.gz
+wget "${WSL_BIN}" -t -O wslbin.tar.gz
 tar -xf wslbin.tar.gz .
-mkdir -p $WIN_BIN
-mv wsl-vpnkit.exe $WIN_BIN
-mv npiperelay.exe $WIN_BIN
+mkdir -p "${WIN_BIN}"
+mv wsl-vpnkit.exe "${WIN_BIN}"
+mv npiperelay.exe "${WIN_BIN}"
 mv vpnkit-tap-vsockd /sbin
 chown root:root /sbin/vpnkit-tap-vsockd
 rm wslbin.tar.gz 
@@ -36,9 +39,5 @@ chmod +x /etc/init.d/wsl-vpnkit
 touch /etc/sudoers.d/wsl-vpnkit
 write_to_file "${SUDO_USER} ALL=(ALL) NOPASSWD: /usr/sbin/service wsl-vpnkit *" /etc/sudoers.d/wsl-vpnkit
 
-
-
 write_to_file "service wsl-vpnkit start"  /etc/profile
 write_to_file "service wsl-vpnkit start"  /etc/zsh/zprofile
-
-

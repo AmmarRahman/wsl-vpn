@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/usr/bin/env sh
 
 WSLVPNKIT_PATH="/usr/bin/wsl_vpn_start.sh"
 PID_PATH="/var/run/wsl-vpnkit.pid"

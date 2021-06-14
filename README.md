@@ -18,6 +18,11 @@ This is the preferred option since it gurantees fresh copies of all the dependen
 ### *Option 2:*    
 If you prefer not to install Docker on your windows machine, you can run `sudo ./wsl-vpn-setup-no-docker.sh` which would download the required files.
 
+## Removal
+
+In case you want to remove or re-install the wsl-vpn files, you can run:
+
+1. `sudo ./wsl-vpn-unsetup.sh`
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
