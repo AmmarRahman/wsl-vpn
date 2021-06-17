@@ -10,19 +10,19 @@ Once you have pulled the repoistory into your WSL2 environment you have two opti
 
 ### *Option 1:*
 
-This is the preferred option since it gurantees fresh copies of all the dependencies to run the tunnel. 
+This is the preferred option since it gurantees fresh copies of all the dependencies to run the tunnel.
 1. Install Docker Desktop on your windows machine.
-2. run `sudo ./wsl-vpn-setup.sh` from within this folder
+2. run `sudo ./wsl-vpnkit-setup.sh` from within this folder
 
 
-### *Option 2:*    
-If you prefer not to install Docker on your windows machine, you can run `sudo ./wsl-vpn-setup-no-docker.sh` which would download the required files.
+### *Option 2:*
+If you prefer not to install Docker on your windows machine, you can run `sudo ./wsl-vpnkit-setup.sh --no-docker` which would download the required files.
 
 ## Removal
 
-In case you want to remove or re-install the wsl-vpn files, you can run:
+In case you want to remove and/or re-install the wsl-vpn files, you can run:
 
-1. `sudo ./wsl-vpn-unsetup.sh`
+1. `sudo ./wsl-vpnkit-unsetup.sh`
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
