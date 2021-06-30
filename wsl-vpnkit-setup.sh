@@ -120,26 +120,6 @@ else
   touch /etc/.wsl.conf.orig
 fi
 
-if ! grep "^generateResolvConf = false" /etc/wsl.conf &> /dev/null; then
-  if ! grep "^\[network\]" /etc/wsl.conf &> /dev/null; then
-    if [ -s /etc/wsl.conf ]; then
-      # append to end of the file, always makes it its own line
-      sed -i '$a[network]' /etc/wsl.conf
-    else
-      # Sed doesn't work on empty files
-      echo "[network]" > /etc/wsl.conf
-    fi
-  fi
-  sed -i 's|^\[network\].*|&\ngenerateResolvConf = false|' /etc/wsl.conf
-fi
-
-# /etc/resolv.conf
-if [ -L /etc/resolv.conf ]; then
-  unlink /etc/resolv.conf
-fi
-if [ "${additional_wsl}" = "1" ]; then
-  echo "nameserver 192.168.67.1" > /etc/resolv.conf
-fi
 
 # echo "Starting service..."
 # service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
