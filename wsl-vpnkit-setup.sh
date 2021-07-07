@@ -38,7 +38,7 @@ if [ "${additional_wsl}" = "0" ]; then
   deb_install=(socat)
   if [ "${no_docker}" = "0" ]; then
     dependencies+=(unzip isoinfo)
-    deb_install=(unzip genisoimage)
+    deb_install+=(unzip genisoimage)
   fi
 
   for cmd in "${dependencies[@]}"; do
