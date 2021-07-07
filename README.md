@@ -6,17 +6,20 @@ The solution utilises [Docker's VPNKit](https://github.com/moby/vpnkit) and [Jef
 
 ## Getting started
 
-Once you have pulled the repoistory into your WSL2 environment you have two options
-
-### *Option 1:*
-
-This is the preferred option since it gurantees fresh copies of all the dependencies to run the tunnel.
-1. Install Docker Desktop on your windows machine.
-2. run `sudo ./wsl-vpnkit-setup.sh` from within this folder
-
-
-### *Option 2:*
-If you prefer not to install Docker on your windows machine, you can run `sudo ./wsl-vpnkit-setup.sh --no-docker` which would download the required files.
+1. Clone the repo, in windows or WSL.
+    - If you are currently on VPN, you can only clone from WSL1 or Windows. It doesn't matter where you put the repo, as it can be removed when done.
+2. (Currently) if you are on VPN, you will have to install `socat` (and `unzip` and `isoinfo` for Option 1 below) before you can run the setup script.
+    - Easy option: Get off of VPN
+    - Or if you cannot (for example, always-on-VPN Corporate rules)
+        1. You can convert to image to WSL1: Windows: `wsl --set-version {WSL_NAME} 1`
+        2. Install these dependencies (e.g. `apt-get update; apt-get install socat unzip genisoinfo`)
+        3. Convert it back to WSL2: Windows: `wsl --set-version {WSL_NAME} 2`
+3. Run the setup script:
+    - *Option 1:* The preferred option since it gurantees fresh copies of all the dependencies to run the tunnel.
+        1. Install Docker Desktop on your windows machine.
+        2. Run `sudo ./wsl-vpnkit-setup.sh` from within this folder
+    - *Option 2:* If you prefer not to install Docker on your windows machine, you can run `` which would download the required files.
+        1. `sudo ./wsl-vpnkit-setup.sh --no-docker`
 
 ## Removal
 
