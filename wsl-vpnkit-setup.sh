@@ -5,7 +5,6 @@ set -eu
 source common.env
 
 # Arg Parse
-no_docker=0
 additional_wsl=0
 while (( $# )); do
   case "${1}" in
