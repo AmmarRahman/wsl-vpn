@@ -43,20 +43,40 @@ tap()
 
 ipconfig()
 {
+  # Remove the default interface first
+  IP_ROUTE="$(ip route | grep default)"
+  ip route del ${IP_ROUTE} # No quotes, it needs to use the spaces
+  ETHERNET_DEVICE="${IP_ROUTE##* }"
+  local OLD_IFS="${IFS}"
+  local IFS=$'\n'
+  OTHER_ROUTES=($(ip route | grep "${ETHERNET_DEVICE}"))
+  IFS="${OLD_IFS}"
+  for route in ${OTHER_ROUTES[@]+"${OTHER_ROUTES[@]}"}; do
+    ip route del ${route} # No quotes
+  done
+ 
+  # plumb what will probably be eth1
   ip a add "${VPNKIT_LOWEST_IP}/255.255.255.0" dev "${TAP_NAME}"
   ip link set dev "${TAP_NAME}" up
-  IP_ROUTE=$(ip route | grep default)
-  ip route del ${IP_ROUTE}
+
+  # Set the new default route
   ip route add default via "${VPNKIT_GATEWAY_IP}" dev "${TAP_NAME}"
-  RESOLV_CONF=$(cat /etc/resolv.conf)
-  echo "nameserver ${VPNKIT_GATEWAY_IP}" > /etc/resolv.conf
 }
 
 close()
 {
   ip link set dev "${TAP_NAME}" down
-  ip route add "${IP_ROUTE}"
-  echo "${RESOLV_CONF}" > /etc/resolv.conf
+  
+  # for some reason, you get this problem https://serverfault.com/a/978311/321910
+  # Adding onlink works, and will be remove when WSL restarts, so it seems harmless
+  if [[ ${IP_ROUTE} =~ onlink ]]; then
+    ip route add ${IP_ROUTE} # No quotes
+  else 
+    ip route add ${IP_ROUTE} onlink  # No quotes
+  fi
+  for route in ${OTHER_ROUTES[@]+"${OTHER_ROUTES[@]}"}; do
+    ip route add ${route} # No quotes
+  done
   kill 0
 }
 
@@ -66,11 +86,13 @@ if [ "${EUID:-"$(id -u)"}" -ne 0 ]; then
 fi
 
 relay &
-sleep 3
+while [ ! -S "${SOCKET_PATH}" ]; do
+  sleep 0.001
+done
 vpnkit &
-sleep 3
+sleep 3 # Is this needed?
 tap &
-sleep 3
+sleep 3 # Is this needed?
 ipconfig
 trap close exit
 trap exit int term

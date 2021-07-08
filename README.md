@@ -27,6 +27,11 @@ In case you want to remove and/or re-install the wsl-vpn files, you can run:
 
 1. `sudo ./wsl-vpnkit-unsetup.sh`
 
+## Troubleshooting
+
+1. `./wsl-vpnkit-setup.sh: line 64: WSL_DISTRO_NAME: unbound variable`
+    - If you decided to `su -` or `sudo su -` instead of following the instructions as stated (i.e. `sudo {command}`) then the environment variable `WSL_DISTRO_NAME` will not be set. An easy solution is to set it yourself: e.g. `declare -p WSL_DISTRO_NAME=Ubuntu-20.04` where `Ubuntu-20.04` is the name of the WSL image you are running.
+
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 * [wsl-vpnkit](https://github.com/sakai135/wsl-vpnkit)
