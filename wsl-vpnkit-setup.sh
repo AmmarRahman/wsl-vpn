@@ -84,9 +84,6 @@ if [ "${no_docker}" = "0" ]; then
   chown root:root /usr/local/sbin/vpnkit-tap-vsockd
 
   # Install c:\bin\npiperelay.exe
-  # This doesn't require WSL internet to be working. Apparently calling powershell
-  # this way writes directly to this same directory
-  # /mnt/c/WINDOWS/system32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -Command "Invoke-WebRequest -Uri https://github.com/jstarks/npiperelay/releases/download/v0.1.0/npiperelay_windows_amd64.zip -OutFile npiperelay_windows_amd64.zip"
   download "${NPIPRELAY_URL}" npiperelay_windows_amd64.zip
   unzip npiperelay_windows_amd64.zip npiperelay.exe
   rm npiperelay_windows_amd64.zip
