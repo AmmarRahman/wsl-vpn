@@ -43,20 +43,40 @@ tap()
 
 ipconfig()
 {
+  # Remove the default interface first
+  IP_ROUTE="$(ip route | grep default)"
+  ip route del ${IP_ROUTE} # No quotes, it needs to use the spaces
+  ETHERNET_DEVICE="${IP_ROUTE##* }"
+  local OLD_IFS="${IFS}"
+  local IFS=$'\n'
+  OTHER_ROUTES=($(ip route | grep "${ETHERNET_DEVICE}"))
+  IFS="${OLD_IFS}"
+  for route in ${OTHER_ROUTES[@]+"${OTHER_ROUTES[@]}"}; do
+    ip route del ${route} # No quotes
+  done
+ 
+  # plumb what will probably be eth1
   ip a add "${VPNKIT_LOWEST_IP}/255.255.255.0" dev "${TAP_NAME}"
   ip link set dev "${TAP_NAME}" up
-  IP_ROUTE=$(ip route | grep default)
-  ip route del ${IP_ROUTE}
+
+  # Set the new default route
   ip route add default via "${VPNKIT_GATEWAY_IP}" dev "${TAP_NAME}"
-  RESOLV_CONF=$(cat /etc/resolv.conf)
-  echo "nameserver ${VPNKIT_GATEWAY_IP}" > /etc/resolv.conf
 }
 
 close()
 {
   ip link set dev "${TAP_NAME}" down
-  ip route add "${IP_ROUTE}"
-  echo "${RESOLV_CONF}" > /etc/resolv.conf
+  
+  # for some reason, you get this problem https://serverfault.com/a/978311/321910
+  # Adding onlink works, and will be remove when WSL restarts, so it seems harmless
+  if [[ ${IP_ROUTE} =~ onlink ]]; then
+    ip route add ${IP_ROUTE} # No quotes
+  else 
+    ip route add ${IP_ROUTE} onlink  # No quotes
+  fi
+  for route in ${OTHER_ROUTES[@]+"${OTHER_ROUTES[@]}"}; do
+    ip route add ${route} # No quotes
+  done
   kill 0
 }
 
@@ -65,13 +85,41 @@ if [ "${EUID:-"$(id -u)"}" -ne 0 ]; then
   exit 1
 fi
 
+# Connect the windows named pipe to  socket
 relay &
-sleep 3
+
+# Wait for socket to be created
+while [ ! -S "${SOCKET_PATH}" ]; do
+  sleep 0.001
+done
+
+# Connect to the windows side of the socket
 vpnkit &
-sleep 3
+# Connect to the linux side of the socket, and tap it as an ethernet device
 tap &
-sleep 3
+
+# Wait for the ethernet device to be tapped
+# if command -f lshw &> /dev/null; then
+#   timeout 3 while : ; do
+#     if lshw -C network | grep "${TAP_NAME}"; then
+#       break
+#     fi
+#   done
+#   echo "Device "${TAP_NAME}" is taking too long to tap" >&2
+# else
+#   sleep 3
+# fi
+while [ ! -e "/sys/class/net/${TAP_NAME}" ]; do
+  sleep 0.0001
+done
+
+# create eth1 and patch routing table
 ipconfig
+
+# Make sure routing table is restored when finished, or else wsl.exe --terminate
+# will be needed to restore the routing table
 trap close exit
 trap exit int term
+
+# Just wait for the service to be killed
 wait
