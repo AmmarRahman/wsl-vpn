@@ -26,9 +26,11 @@ if [ ${EUID:-$(id -u)} -ne 0 ]; then
   exit 1
 fi
 
-# Need WSL_DISTRO_NAME, because _this_ wsl might not be the default
+# Need WSL_DISTRO_NAME, because sudo usually removes this variable
 if [ -z "${WSL_DISTRO_NAME:+set}" ]; then
-  eval "$(cat /proc/$(ppid $(ppid $$))/environ | tr "\0" "\n" | grep ^WSL_DISTRO_NAME=)"
+  # eval "$(cat /proc/$(ppid $(ppid $$))/environ | tr "\0" "\n" | grep ^WSL_DISTRO_NAME=)"
+  # Better way: https://github.com/microsoft/WSL/issues/4479#issuecomment-876698799
+  WSL_DISTRO_NAME="$(IFS='\'; x=($(wslpath -w /)); echo "${x[${#x[@]}-1]}")"
 fi
 
 # Determine dependencies
@@ -109,7 +111,6 @@ write_to_file "service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
 echo "Setup complete!"
 
 if [ "${no_start}" = "0" ]; then
-  echo "Starting service..."
   service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
-  echo "Should be working in 6 seconds"
+  echo "WSL VPNKit Service started. You may proceed to use the internet like normal"
 fi

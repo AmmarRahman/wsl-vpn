@@ -17,20 +17,26 @@ The solution utilises [Docker's VPNKit](https://github.com/moby/vpnkit) and [Jef
 3. Run the setup script:
     - *Option 1:* The preferred option since it gurantees fresh copies of all the dependencies to run the tunnel.
         1. Install Docker Desktop on your windows machine.
-        2. Run `sudo ./wsl-vpnkit-setup.sh` from within this folder
-    - *Option 2:* If you prefer not to install Docker on your windows machine, you can run `` which would download the required files.
+        2. Run `sudo ./wsl-vpnkit-setup.sh` from within this folder in WSL
+    - *Option 2:* If you prefer not to (or can't) install Docker on your Windows machine, you can have the script download the required files instead.
         1. `sudo ./wsl-vpnkit-setup.sh --no-docker`
+
+Once everything is working and you are satisfied, you can feel free to remove the cloned repository; all relavent files have been installed (However, you cannot delete `C:\bin\` in Windows)
 
 ## Removal
 
 In case you want to remove and/or re-install the wsl-vpn files, you can run:
 
-1. `sudo ./wsl-vpnkit-unsetup.sh`
+1. In the cloned repo, run:
+    - `sudo ./wsl-vpnkit-unsetup.sh`
 
-## Troubleshooting
+## FAQ
 
-1. `./wsl-vpnkit-setup.sh: line 64: WSL_DISTRO_NAME: unbound variable`
-    - If you decided to `su -` or `sudo su -` instead of following the instructions as stated (i.e. `sudo {command}`) then the environment variable `WSL_DISTRO_NAME` will not be set. An easy solution is to set it yourself: e.g. `declare -p WSL_DISTRO_NAME=Ubuntu-20.04` where `Ubuntu-20.04` is the name of the WSL image you are running.
+1. What if I have multiple WSLs?
+    - You only install WSL-VPN into one WSL2 distro. The rest of the distros will get working internet from the WSL-VPN distro.
+    - The only caveat is that you must start the WSL-VPN distro everytime you restart your computer or "shutdown" or "terminate" the WSL-VPN distro.
+    - Simply opening up a tab to the WSL-VPN distro starts and fixes all of the other WSL2 distros. You can close it as soon as you open it.
+    - If you need to script starting WSL-VPN: `/mnt/c/Windows/System32/wsl.exe -d {WSL-VPN distro name} --user root service wsl-vpnkit start`
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements

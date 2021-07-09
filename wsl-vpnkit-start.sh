@@ -85,15 +85,41 @@ if [ "${EUID:-"$(id -u)"}" -ne 0 ]; then
   exit 1
 fi
 
+# Connect the windows named pipe to  socket
 relay &
+
+# Wait for socket to be created
 while [ ! -S "${SOCKET_PATH}" ]; do
   sleep 0.001
 done
+
+# Connect to the windows side of the socket
 vpnkit &
-sleep 3 # Is this needed?
+# Connect to the linux side of the socket, and tap it as an ethernet device
 tap &
-sleep 3 # Is this needed?
+
+# Wait for the ethernet device to be tapped
+# if command -f lshw &> /dev/null; then
+#   timeout 3 while : ; do
+#     if lshw -C network | grep "${TAP_NAME}"; then
+#       break
+#     fi
+#   done
+#   echo "Device "${TAP_NAME}" is taking too long to tap" >&2
+# else
+#   sleep 3
+# fi
+while [ ! -e "/sys/class/net/${TAP_NAME}" ]; do
+  sleep 0.0001
+done
+
+# create eth1 and patch routing table
 ipconfig
+
+# Make sure routing table is restored when finished, or else wsl.exe --terminate
+# will be needed to restore the routing table
 trap close exit
 trap exit int term
+
+# Just wait for the service to be killed
 wait
