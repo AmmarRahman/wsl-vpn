@@ -36,10 +36,6 @@ fi
 # Determine dependencies
 dependencies=(socat)
 deb_install=(socat)
-if [ "${no_docker}" = "0" ]; then
-  dependencies+=(unzip isoinfo)
-  deb_install+=(unzip genisoimage)
-fi
 
 for cmd in "${dependencies[@]}"; do
   if ! command -v "${cmd}" &> /dev/null; then
@@ -80,18 +76,18 @@ if [ "${no_docker}" = "0" ]; then
   cp "${DOCKER_WSL}/vpnkit.exe" "${WIN_BIN}/wsl-vpnkit.exe"
 
   # Install /usr/local/sbin/vpnkit-tap-vsockd
-  isoinfo -i "${DOCKER_WSL}/wsl/docker-for-wsl.iso" -R -x /containers/services/vpnkit-tap-vsockd/lower/sbin/vpnkit-tap-vsockd > ./vpnkit-tap-vsockd
+  extract_from_iso_ps "${DOCKER_WSL}/wsl/docker-for-wsl.iso" containers/services/vpnkit-tap-vsockd/lower/sbin/vpnkit-tap-vsockd vpnkit-tap-vsockd
   mv vpnkit-tap-vsockd /usr/local/sbin/vpnkit-tap-vsockd
   chmod +x /usr/local/sbin/vpnkit-tap-vsockd
   chown root:root /usr/local/sbin/vpnkit-tap-vsockd
 
   # Install c:\bin\npiperelay.exe
-  download "${NPIPRELAY_URL}" npiperelay_windows_amd64.zip
-  unzip npiperelay_windows_amd64.zip npiperelay.exe
+  download_ps "${NPIPRELAY_URL}" npiperelay_windows_amd64.zip
+  unzip_ps npiperelay_windows_amd64.zip npiperelay.exe
   rm npiperelay_windows_amd64.zip
   mv npiperelay.exe "${WIN_BIN}"
 else
-  download "${WSLBIN_URL}" wslbin.tar.gz
+  download_ps "${WSLBIN_URL}" wslbin.tar.gz
   tar -xf wslbin.tar.gz .
   mv wsl-vpnkit.exe "${WIN_BIN}"
   mv npiperelay.exe "${WIN_BIN}"

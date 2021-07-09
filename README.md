@@ -8,11 +8,11 @@ The solution utilises [Docker's VPNKit](https://github.com/moby/vpnkit) and [Jef
 
 1. Clone the repo, in windows or WSL.
     - If you are currently on VPN, you can only clone from WSL1 or Windows. It doesn't matter where you put the repo, as it can be removed when done.
-2. (Currently) if you are on VPN, you will have to install `socat` (and `unzip` and `isoinfo` for Option 1 below) before you can run the setup script.
+2. (Currently) if you are on VPN, you will have to install `socat` before you can run the setup script.
     - Easy option: Get off of VPN
     - Or if you cannot (for example, always-on-VPN Corporate rules)
         1. You can convert to image to WSL1: Windows: `wsl --set-version {WSL_NAME} 1`
-        2. Install these dependencies (e.g. `apt-get update; apt-get install socat unzip genisoinfo`)
+        2. Install these dependencies (e.g. `apt-get update; apt-get install socat`)
         3. Convert it back to WSL2: Windows: `wsl --set-version {WSL_NAME} 2`
 3. Run the setup script:
     - *Option 1:* The preferred option since it gurantees fresh copies of all the dependencies to run the tunnel.

@@ -18,7 +18,6 @@ WIN_PIPE_PATH="${PIPE_PATH//\//\\}"
 TAP_NAME=eth1
 
 IP_ROUTE=
-RESOLV_CONF=
 
 relay()
 {
