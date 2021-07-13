@@ -13,6 +13,8 @@ while (( $# )); do
     --no-start)
       no_start=1
       ;;
+    --on-vpn)
+      on_vpn=1
     *)
       echo "Usage: $0 [--no-docker|--no-start]" >&2
       exit 2
@@ -33,24 +35,34 @@ if [ -z "${WSL_DISTRO_NAME:+set}" ]; then
   WSL_DISTRO_NAME="$(IFS='\'; x=($(wslpath -w /)); echo "${x[${#x[@]}-1]}")"
 fi
 
-# Determine dependencies
-dependencies=(socat)
-deb_install=(socat)
-
-for cmd in "${dependencies[@]}"; do
-  if ! command -v "${cmd}" &> /dev/null; then
+if ! command -v socat &> /dev/null; then
+  if [ "${on_vpn}" = "0" ]; then
     if command -v apt &> /dev/null; then
       apt update
-      apt install -y "${deb_install[@]}"
-      break
-    # elif command -v yast2 &> /dev/null; then
-    #   ...
+      apt install -y socat
+    elif command -v zypper &> /dev/null; then
+      zypper install -y socat
+    elif command -v dnf &> /dev/null; then
+      dnf install -y socat
+    elif command -v yum &> /dev/null; then
+      yum install -y socat
+    elif command -v apk &> /dev/null; then
+      apk add --no-cache socat
     else
-      echo "Todo: program other package managers" &> /dev/null
-      exit 3
+      echo "There is no automates solution to install \"socat\" on OS" >&2
+      read -pr "Please enter a command to install \"socat\": " cmd
+      eval "${cmd}"
+      if ! command -v socat; then
+        echo "socat does not appear to be installed. Please get socat installed and try again"
+        exit 3
+      fi
     fi
+  else
+    # This appears to work in alpine (musl) and ubuntu/fedora alike (glibc)
+    download_ps https://github.com/andrew-d/static-binaries/raw/8ae38c79510d072cdba0bf719ef4f16c052e2abc/binaries/linux/x86_64/socat /usr/local/bin/socat
+    chmod 755 /usr/local/bin/socat
   fi
-done
+fi
 
 # Install /usr/local/bin/wsl-vpnkit-start.sh
 cp ./wsl-vpnkit-start.sh /usr/local/bin/
