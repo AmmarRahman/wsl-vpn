@@ -13,6 +13,9 @@ while (( $# )); do
     --no-start)
       no_start=1
       ;;
+    --on-vpn)
+      on_vpn=1
+      ;;
     *)
       echo "Usage: $0 [--no-docker|--no-start]" >&2
       exit 2
@@ -33,28 +36,31 @@ if [ -z "${WSL_DISTRO_NAME:+set}" ]; then
   WSL_DISTRO_NAME="$(IFS='\'; x=($(wslpath -w /)); echo "${x[${#x[@]}-1]}")"
 fi
 
-# Determine dependencies
-dependencies=(socat)
-deb_install=(socat)
-if [ "${no_docker}" = "0" ]; then
-  dependencies+=(unzip isoinfo)
-  deb_install+=(unzip genisoimage)
-fi
-
-for cmd in "${dependencies[@]}"; do
-  if ! command -v "${cmd}" &> /dev/null; then
-    if command -v apt &> /dev/null; then
-      apt update
-      apt install -y "${deb_install[@]}"
-      break
-    # elif command -v yast2 &> /dev/null; then
-    #   ...
-    else
-      echo "Todo: program other package managers" &> /dev/null
+function install_socat()
+{
+  if command -v apt > /dev/null 2>&1; then
+    apt update
+    apt install -y socat
+  else
+    echo "There is no automated solution to install \"socat\" on this OS" >&2
+    read -pr "Please enter a command to install \"socat\": " cmd
+    eval "${cmd}"
+    if ! command -v socat; then
+      echo "socat does not appear to be installed. Please get socat installed and try again, or try using --on-vpn"
       exit 3
     fi
   fi
-done
+}
+
+if ! command -v socat &> /dev/null; then
+  if [ "${on_vpn}" = "0" ]; then
+    install_socat
+  else
+    # This appears to work in alpine (musl) and ubuntu/fedora alike (glibc)
+    download_ps https://github.com/andrew-d/static-binaries/raw/8ae38c79510d072cdba0bf719ef4f16c052e2abc/binaries/linux/x86_64/socat /usr/local/bin/socat
+    chmod 755 /usr/local/bin/socat
+  fi
+fi
 
 # Install /usr/local/bin/wsl-vpnkit-start.sh
 cp ./wsl-vpnkit-start.sh /usr/local/bin/
@@ -75,23 +81,24 @@ if [ -n "${SUDO_USER:+set}" ]; then
 fi
 
 mkdir -p "${WIN_BIN}"
+mkdir -p /usr/local/sbin
 if [ "${no_docker}" = "0" ]; then
   # Install c:\bin\wsl-vpnkit.exe
   cp "${DOCKER_WSL}/vpnkit.exe" "${WIN_BIN}/wsl-vpnkit.exe"
 
   # Install /usr/local/sbin/vpnkit-tap-vsockd
-  isoinfo -i "${DOCKER_WSL}/wsl/docker-for-wsl.iso" -R -x /containers/services/vpnkit-tap-vsockd/lower/sbin/vpnkit-tap-vsockd > ./vpnkit-tap-vsockd
+  extract_from_iso_ps "${DOCKER_WSL}/wsl/docker-for-wsl.iso" containers/services/vpnkit-tap-vsockd/lower/sbin/vpnkit-tap-vsockd vpnkit-tap-vsockd
   mv vpnkit-tap-vsockd /usr/local/sbin/vpnkit-tap-vsockd
   chmod +x /usr/local/sbin/vpnkit-tap-vsockd
   chown root:root /usr/local/sbin/vpnkit-tap-vsockd
 
   # Install c:\bin\npiperelay.exe
-  download "${NPIPRELAY_URL}" npiperelay_windows_amd64.zip
-  unzip npiperelay_windows_amd64.zip npiperelay.exe
+  download_ps "${NPIPRELAY_URL}" npiperelay_windows_amd64.zip
+  unzip_ps npiperelay_windows_amd64.zip npiperelay.exe
   rm npiperelay_windows_amd64.zip
   mv npiperelay.exe "${WIN_BIN}"
 else
-  download "${WSLBIN_URL}" wslbin.tar.gz
+  download_ps "${WSLBIN_URL}" wslbin.tar.gz
   tar -xf wslbin.tar.gz .
   mv wsl-vpnkit.exe "${WIN_BIN}"
   mv npiperelay.exe "${WIN_BIN}"
@@ -108,9 +115,20 @@ chown root:root /etc/profile.d/wsl-vpnkit.sh
 # Edit /etc/zsh/zprofile
 write_to_file "service wsl-vpnkit status > /dev/null || service wsl-vpnkit start"  /etc/zsh/zprofile
 
-echo "Setup complete!"
+if [ "${on_vpn}" = "0" ]; then
+  echo "Setup complete!"
+fi
 
 if [ "${no_start}" = "0" ]; then
   service wsl-vpnkit status > /dev/null || service wsl-vpnkit start
   echo "WSL VPNKit Service started. You may proceed to use the internet like normal"
+
+  if [ "${on_vpn}" = "1" ]; then
+    if [ -f "/usr/local/sbin/socat" ]; then
+      rm /usr/local/sbin/socat
+    fi
+    if ! command -v socat &> /dev/null; then
+      install_socat
+    fi
+  fi
 fi

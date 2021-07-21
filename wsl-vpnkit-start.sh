@@ -18,7 +18,6 @@ WIN_PIPE_PATH="${PIPE_PATH//\//\\}"
 TAP_NAME=eth1
 
 IP_ROUTE=
-RESOLV_CONF=
 
 relay()
 {
@@ -54,7 +53,7 @@ ipconfig()
   for route in ${OTHER_ROUTES[@]+"${OTHER_ROUTES[@]}"}; do
     ip route del ${route} # No quotes
   done
- 
+
   # plumb what will probably be eth1
   ip a add "${VPNKIT_LOWEST_IP}/255.255.255.0" dev "${TAP_NAME}"
   ip link set dev "${TAP_NAME}" up
@@ -66,12 +65,12 @@ ipconfig()
 close()
 {
   ip link set dev "${TAP_NAME}" down
-  
+
   # for some reason, you get this problem https://serverfault.com/a/978311/321910
   # Adding onlink works, and will be remove when WSL restarts, so it seems harmless
   if [[ ${IP_ROUTE} =~ onlink ]]; then
     ip route add ${IP_ROUTE} # No quotes
-  else 
+  else
     ip route add ${IP_ROUTE} onlink  # No quotes
   fi
   for route in ${OTHER_ROUTES[@]+"${OTHER_ROUTES[@]}"}; do
@@ -99,16 +98,6 @@ vpnkit &
 tap &
 
 # Wait for the ethernet device to be tapped
-# if command -f lshw &> /dev/null; then
-#   timeout 3 while : ; do
-#     if lshw -C network | grep "${TAP_NAME}"; then
-#       break
-#     fi
-#   done
-#   echo "Device "${TAP_NAME}" is taking too long to tap" >&2
-# else
-#   sleep 3
-# fi
 while [ ! -e "/sys/class/net/${TAP_NAME}" ]; do
   sleep 0.0001
 done
