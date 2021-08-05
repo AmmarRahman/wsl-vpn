@@ -40,6 +40,15 @@ In case you want to remove and/or re-install the wsl-vpn files, you can run:
 2. What if I want to use a distro other than Debian/Ubuntu?
     - You can install a Debian or Ubuntu from the Windows store to run along side your other distros, and use the multiple WSLs support to get your particular distro to work.
     - The only part that is specific to Debian and Ubuntu is the service script. You are free to wrap the script `/usr/local
+3. What if I'm trying to expose a port from WSL2?
+    - Unforunately, this solution will not allow you to expose a port when on or off of VPN. If you need to expose a port when off of VPN, you'll need to run the `./wsl-vpnkit-unsetup.sh` script
+4. What about IPv6?
+    - On tested clients IPv6 actually works when on VPN without the need for WSL-VPN, and continues to work when WSL-VPN is fixing IPv4. Tested clients include:
+        - SonicWall NetExtender
+    - Exposing ports on IPv6 still works
+5. What if I started killing random parts of the WSL-VPN, and now nothing's working.
+    - Well, if the scripts are killed mid-script, they can't restore settings. But to fix this, you simply run: `wsl --shutdown` and everything will be restored.
+    - **Note**: This will restart _all_ WSLs. I.e. if you are running docker, it will be restarted.
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
