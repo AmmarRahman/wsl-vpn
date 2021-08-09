@@ -17,7 +17,7 @@ while (( $# )); do
       on_vpn=1
       ;;
     *)
-      echo "Usage: $0 [--no-docker|--no-start]" >&2
+      echo "Usage: $0 [--no-docker|--no-start|--on-vpn]" >&2
       exit 2
       ;;
   esac
@@ -57,7 +57,8 @@ if ! command -v socat &> /dev/null; then
     install_socat
   else
     # This appears to work in alpine (musl) and ubuntu/fedora alike (glibc)
-    download_ps https://github.com/andrew-d/static-binaries/raw/8ae38c79510d072cdba0bf719ef4f16c052e2abc/binaries/linux/x86_64/socat /usr/local/bin/socat
+    download_ps https://github.com/andrew-d/static-binaries/raw/8ae38c79510d072cdba0bf719ef4f16c052e2abc/binaries/linux/x86_64/socat socat
+    mv socat /usr/local/bin/socat
     chmod 755 /usr/local/bin/socat
   fi
 fi
@@ -124,8 +125,8 @@ if [ "${no_start}" = "0" ]; then
   echo "WSL VPNKit Service started. You may proceed to use the internet like normal"
 
   if [ "${on_vpn}" = "1" ]; then
-    if [ -f "/usr/local/sbin/socat" ]; then
-      rm /usr/local/sbin/socat
+    if [ -f "/usr/local/bin/socat" ]; then
+      rm /usr/local/bin/socat
     fi
     if ! command -v socat &> /dev/null; then
       install_socat
