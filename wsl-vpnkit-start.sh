@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-WIN_BIN="/mnt/c/bin"
+WIN_BIN=$(wslpath "C:\bin")
 
 SOCKET_PATH=/var/run/wsl-vpnkit.sock
 PIPE_PATH="//./pipe/wsl-vpnkit"
