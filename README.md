@@ -41,7 +41,10 @@ In case you want to remove and/or re-install the wsl-vpn files, you can run:
     - You can install a Debian or Ubuntu from the Windows store to run along side your other distros, and use the multiple WSLs support to get your particular distro to work.
     - The only part that is specific to Debian and Ubuntu is the service script. You are free to wrap the script `/usr/local
 3. What if I'm trying to expose a port from WSL2?
-    - Unforunately, this solution will not allow you to expose a port when on or off of VPN. If you need to expose a port when off of VPN, you'll need to run the `./wsl-vpnkit-unsetup.sh` script
+    - Ports bound to localhost in WSL2 will be listening on localhost on the Windows Host side. 
+    - Unforunately, this solution will not allow you to expose a port on any other IP when on or off of VPN.
+        - If you need to expose a port (other than on localhost) when off of VPN, you'll need to run the `./wsl-vpnkit-unsetup.sh` script
+        - A `socat`-like solution might also be possible on the Windows side (e.g. [cygwin](https://cygwin.com/cgi-bin2/package-grep.cgi?grep=socat&arch=x86_64)) that will allow you to link localhost to another IP.
 4. What about IPv6?
     - On tested clients IPv6 actually works when on VPN without the need for WSL-VPN, and continues to work when WSL-VPN is fixing IPv4. Tested clients include:
         - SonicWall NetExtender
